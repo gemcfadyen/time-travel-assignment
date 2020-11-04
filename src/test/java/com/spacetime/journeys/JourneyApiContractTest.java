@@ -2,22 +2,24 @@ package com.spacetime.journeys;
 
 import com.spacetime.journeys.domain.JourneyCreatedResponse;
 import com.spacetime.journeys.domain.JourneyRequest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.spacetime.journeys.service.JourneyService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.URI;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class JourneyApiContractTest {
     @LocalServerPort
@@ -25,6 +27,14 @@ public class JourneyApiContractTest {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
+
+    @MockBean
+    private JourneyService service;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void successfullyCreatesAJourney() {
@@ -46,6 +56,8 @@ public class JourneyApiContractTest {
 
     @Test
     public void successfulMessageReturnedInResponseBody() {
+        when(service.scheduleJourney("G123424", "Mars", LocalDate.of(2020, 11, 17)))
+                .thenReturn("J1");
         URI uri = URI.create("/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .personalGalacticIdentifier("G123424")
@@ -59,6 +71,9 @@ public class JourneyApiContractTest {
                 JourneyCreatedResponse.class
         );
 
-        assertThat(response.getBody()).isEqualTo(JourneyCreatedResponse.builder().message("Journey planned successfully").build());
+        assertThat(response.getBody()).isEqualTo(JourneyCreatedResponse.builder()
+                .journeyId("J1")
+                .message("Journey planned successfully")
+                .build());
     }
 }
