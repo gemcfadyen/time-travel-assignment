@@ -68,4 +68,5 @@ public class JourneyControllerTest {
 
         assertThat(response.getJourneyId()).isEqualTo(1L);
     }
+
 }

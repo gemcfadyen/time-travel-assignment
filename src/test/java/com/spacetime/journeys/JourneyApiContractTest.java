@@ -122,4 +122,73 @@ public class JourneyApiContractTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
+
+    @Test
+    public void returnsBadRequestWhenPersonalGalacticIdentifierIsInvalid() {
+        URI uri = URI.create("/journeys");
+        JourneyRequest journeyRequest = JourneyRequest.builder()
+                .personalGalacticIdentifier("1*2")
+                .date(LocalDate.of(2020, 11, 17))
+                .place("Mars")
+                .build();
+
+        ResponseEntity<JourneyCreatedResponse> response = testRestTemplate.postForEntity(
+                uri,
+                journeyRequest,
+                JourneyCreatedResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void returnsBadRequestWhenPersonalGalacticIdentifierIsMissing() {
+        URI uri = URI.create("/journeys");
+        JourneyRequest journeyRequest = JourneyRequest.builder()
+                .date(LocalDate.of(2020, 11, 17))
+                .place("Mars")
+                .build();
+
+        ResponseEntity<JourneyCreatedResponse> response = testRestTemplate.postForEntity(
+                uri,
+                journeyRequest,
+                JourneyCreatedResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void returnsBadRequestWhenPlaceIsMissingOnRequest() {
+        URI uri = URI.create("/journeys");
+        JourneyRequest journeyRequest = JourneyRequest.builder()
+                .personalGalacticIdentifier("F12ssj")
+                .date(LocalDate.of(2020, 11, 17))
+                .build();
+
+        ResponseEntity<JourneyCreatedResponse> response = testRestTemplate.postForEntity(
+                uri,
+                journeyRequest,
+                JourneyCreatedResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void returnsBadRequestWhenDateIsMissingOnRequest() {
+        URI uri = URI.create("/journeys");
+        JourneyRequest journeyRequest = JourneyRequest.builder()
+                .personalGalacticIdentifier("a1212ss")
+                .place("Earth")
+                .build();
+
+        ResponseEntity<JourneyCreatedResponse> response = testRestTemplate.postForEntity(
+                uri,
+                journeyRequest,
+                JourneyCreatedResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
 }

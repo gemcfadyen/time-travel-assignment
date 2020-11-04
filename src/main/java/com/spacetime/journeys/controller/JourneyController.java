@@ -6,11 +6,12 @@ import com.spacetime.journeys.domain.JourneyRequest;
 import com.spacetime.journeys.service.JourneyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/journeys")
 public class JourneyController {
-    private JourneyService service;
+    private final JourneyService service;
 
     public JourneyController(JourneyService service) {
         this.service = service;
@@ -18,7 +19,7 @@ public class JourneyController {
 
     @PostMapping(produces = {"application/json"}, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public JourneyCreatedResponse createJourney(@RequestBody JourneyRequest request) {
+    public JourneyCreatedResponse createJourney(@Valid @RequestBody JourneyRequest request) {
         Journey scheduledJourney = service.scheduleJourney(request.toJourney());
 
         return JourneyCreatedResponse.builder()
