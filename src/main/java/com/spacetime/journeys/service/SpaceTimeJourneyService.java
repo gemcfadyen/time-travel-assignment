@@ -5,6 +5,7 @@ import com.spacetime.journeys.domain.JourneyAlreadyScheduledException;
 import com.spacetime.journeys.repository.JourneyRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,5 +24,15 @@ public class SpaceTimeJourneyService implements JourneyService {
                 }
         );
         return repository.save(journeyDetails);
+    }
+
+    @Override
+    public List<Journey> fetchAllJourneysFor(String personalGalacticIdentifier) {
+        return null;
+    }
+
+    @Override
+    public List<Journey> fetchJourneysDetailsFor(String personalGalacticIdentifier, Long journeyId) {
+        return null;
     }
 }

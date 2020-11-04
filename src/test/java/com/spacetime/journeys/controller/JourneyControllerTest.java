@@ -31,14 +31,13 @@ public class JourneyControllerTest {
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .date(LocalDate.of(2045, 4, 11))
                 .place("Moon")
-                .personalGalacticIdentifier("G23d234")
                 .build();
 
         when(service.scheduleJourney(any())).thenReturn(Journey.builder()
                 .id(1L)
                 .build());
 
-        controller.createJourney(journeyRequest);
+        controller.createJourney("G23d234", journeyRequest);
 
         verify(service).scheduleJourney(Journey.builder()
                 .travellerId("G23d234")
@@ -61,10 +60,9 @@ public class JourneyControllerTest {
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .date(LocalDate.of(2045, 4, 11))
                 .place("Moon")
-                .personalGalacticIdentifier("G23d234")
                 .build();
 
-        JourneyCreatedResponse response = controller.createJourney(journeyRequest);
+        JourneyCreatedResponse response = controller.createJourney("G23d234", journeyRequest);
 
         assertThat(response.getJourneyId()).isEqualTo(1L);
     }

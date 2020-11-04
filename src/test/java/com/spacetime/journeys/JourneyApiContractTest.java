@@ -1,9 +1,6 @@
 package com.spacetime.journeys;
 
-import com.spacetime.journeys.domain.Journey;
-import com.spacetime.journeys.domain.JourneyAlreadyScheduledException;
-import com.spacetime.journeys.domain.JourneyCreatedResponse;
-import com.spacetime.journeys.domain.JourneyRequest;
+import com.spacetime.journeys.domain.*;
 import com.spacetime.journeys.service.JourneyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
@@ -50,9 +48,8 @@ public class JourneyApiContractTest {
                         .id(2L)
                         .build());
 
-        URI uri = URI.create("/journeys");
+        URI uri = URI.create("/travellers/G1234b561/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
-                .personalGalacticIdentifier("G1234b561")
                 .date(LocalDate.of(2020, 11, 17))
                 .place("Mars")
                 .build();
@@ -78,9 +75,8 @@ public class JourneyApiContractTest {
                         .id(2L)
                         .build());
 
-        URI uri = URI.create("/journeys");
+        URI uri = URI.create("/travellers/G123424/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
-                .personalGalacticIdentifier("G123424")
                 .date(LocalDate.of(2020, 11, 17))
                 .place("Mars")
                 .build();
@@ -107,9 +103,8 @@ public class JourneyApiContractTest {
                         .build()))
                 .thenThrow(new JourneyAlreadyScheduledException(2L));
 
-        URI uri = URI.create("/journeys");
+        URI uri = URI.create("/travellers/G123424/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
-                .personalGalacticIdentifier("G123424")
                 .date(LocalDate.of(2020, 11, 17))
                 .place("Mars")
                 .build();
@@ -125,25 +120,25 @@ public class JourneyApiContractTest {
 
     @Test
     public void returnsBadRequestWhenPersonalGalacticIdentifierIsInvalid() {
-        URI uri = URI.create("/journeys");
+        URI uri = URI.create("/travellers/1*2/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
-                .personalGalacticIdentifier("1*2")
                 .date(LocalDate.of(2020, 11, 17))
                 .place("Mars")
                 .build();
 
-        ResponseEntity<JourneyCreatedResponse> response = testRestTemplate.postForEntity(
+        ResponseEntity<String> response = testRestTemplate.postForEntity(
                 uri,
                 journeyRequest,
-                JourneyCreatedResponse.class
+                String.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isEqualTo("createJourney.personalGalacticIdentifier: Invalid personal galactic identifier");
     }
 
     @Test
-    public void returnsBadRequestWhenPersonalGalacticIdentifierIsMissing() {
-        URI uri = URI.create("/journeys");
+    public void returnsNotFoundWhenPersonalGalacticIdentifierIsMissing() {
+        URI uri = URI.create("/travellers//journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .date(LocalDate.of(2020, 11, 17))
                 .place("Mars")
@@ -155,14 +150,13 @@ public class JourneyApiContractTest {
                 JourneyCreatedResponse.class
         );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     public void returnsBadRequestWhenPlaceIsMissingOnRequest() {
-        URI uri = URI.create("/journeys");
+        URI uri = URI.create("/travellers/F12ssj/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
-                .personalGalacticIdentifier("F12ssj")
                 .date(LocalDate.of(2020, 11, 17))
                 .build();
 
@@ -177,9 +171,8 @@ public class JourneyApiContractTest {
 
     @Test
     public void returnsBadRequestWhenDateIsMissingOnRequest() {
-        URI uri = URI.create("/journeys");
+        URI uri = URI.create("/travellers/a1212ss/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
-                .personalGalacticIdentifier("a1212ss")
                 .place("Earth")
                 .build();
 
@@ -190,5 +183,97 @@ public class JourneyApiContractTest {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void successfullyFetchesAllJourneysForATraveller() {
+        URI uri = URI.create("/travellers/a234234/journeys");
+        when(service.fetchAllJourneysFor("a234234")).thenReturn(List.of(
+                Journey.builder()
+                        .id(1L)
+                        .destination("Earth")
+                        .travelDate(LocalDate.of(2020, 1, 1))
+                        .build()
+        ));
+
+        ResponseEntity<FetchTravellersJourneysResponse> response = testRestTemplate.getForEntity(
+                uri,
+                FetchTravellersJourneysResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void returnsDetailsForAllJourneysForATraveller() {
+        URI uri = URI.create("/travellers/a1212ss/journeys");
+        Journey earthJourney = Journey.builder()
+                .id(1L)
+                .travellerId("a1212ss")
+                .destination("Earth")
+                .travelDate(LocalDate.of(2020, 1, 1))
+                .build();
+        Journey saturnJourney = Journey.builder()
+                .id(2L)
+                .travellerId("a1212ss")
+                .destination("Saturn")
+                .travelDate(LocalDate.of(2021, 1, 1))
+                .build();
+
+        when(service.fetchAllJourneysFor("a1212ss")).thenReturn(
+                List.of(
+                        earthJourney,
+                        saturnJourney
+                )
+        );
+
+        ResponseEntity<FetchTravellersJourneysResponse> response = testRestTemplate.getForEntity(
+                uri,
+                FetchTravellersJourneysResponse.class
+        );
+
+        List<Journey> journeys = response.getBody().getJourneys();
+        assertThat(journeys.size()).isEqualTo(2);
+        assertThat(journeys).contains(earthJourney, saturnJourney);
+    }
+
+    @Test
+    public void successfullyFetchesAParticularJourneyForAGivenTraveller() {
+        URI uri = URI.create("/travellers/a1212ss/journeys/1");
+        Journey earthJourney = Journey.builder()
+                .id(1L)
+                .travellerId("a1212ss")
+                .destination("Earth")
+                .travelDate(LocalDate.of(2020, 1, 1))
+                .build();
+
+        when(service.fetchJourneysDetailsFor("a1212ss", 1L)).thenReturn(
+                List.of(earthJourney)
+        );
+
+        ResponseEntity<FetchTravellersJourneysResponse> response = testRestTemplate.getForEntity(
+                uri,
+                FetchTravellersJourneysResponse.class
+        );
+
+        List<Journey> journeys = response.getBody().getJourneys();
+        assertThat(journeys.size()).isEqualTo(1);
+        assertThat(journeys).contains(earthJourney);
+    }
+
+    @Test
+    public void returnsNotFoundWhenSpecificJourneyCanNotBeFound() {
+        URI uri = URI.create("/travellers/a1212ss/journeys/1");
+
+        when(service.fetchJourneysDetailsFor("a1212ss", 1L)).thenThrow(
+                new JourneyNotFoundException()
+        );
+
+        ResponseEntity<FetchTravellersJourneysResponse> response = testRestTemplate.getForEntity(
+                uri,
+                FetchTravellersJourneysResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

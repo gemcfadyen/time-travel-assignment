@@ -1,6 +1,5 @@
 package com.spacetime.journeys.domain;
 
-import com.spacetime.journeys.controller.ValidPersonalGalacticIdentifier;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,16 +8,14 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class JourneyRequest {
-    @ValidPersonalGalacticIdentifier
-    private String personalGalacticIdentifier;
     @NotNull
     private LocalDate date;
     @NotNull
     private String place;
 
-    public Journey toJourney() {
+    public Journey toJourney(String personalGalacticIdentifier) {
        return Journey.builder()
-               .travellerId(this.personalGalacticIdentifier)
+               .travellerId(personalGalacticIdentifier)
                .destination(this.place)
                .travelDate(this.date)
                .build() ;
