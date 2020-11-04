@@ -1,13 +1,10 @@
 package com.spacetime.journeys;
 
 import com.spacetime.journeys.domain.*;
-import com.spacetime.journeys.service.JourneyService;
-import org.junit.jupiter.api.BeforeEach;
+import com.spacetime.journeys.repository.JourneyRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
@@ -16,9 +13,9 @@ import org.springframework.http.ResponseEntity;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class JourneyApiContractTest {
@@ -28,26 +25,11 @@ public class JourneyApiContractTest {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
-    @MockBean
-    private JourneyService service;
-
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
+    @Autowired
+    private JourneyRepository inMemorySpaceTimeJourneyRepository;
 
     @Test
     public void successfullyCreatesAJourney() {
-        when(service.scheduleJourney(
-                Journey.builder()
-                        .travellerId("G1234b561")
-                        .destination("Mars")
-                        .travelDate(LocalDate.of(2020, 11, 17))
-                        .build()))
-                .thenReturn(Journey.builder()
-                        .id(2L)
-                        .build());
-
         URI uri = URI.create("/travellers/G1234b561/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .date(LocalDate.of(2020, 11, 17))
@@ -65,16 +47,6 @@ public class JourneyApiContractTest {
 
     @Test
     public void successfulMessageReturnedInResponseBody() {
-        when(service.scheduleJourney(
-                Journey.builder()
-                        .travellerId("G123424")
-                        .destination("Mars")
-                        .travelDate(LocalDate.of(2020, 11, 17))
-                        .build()))
-                .thenReturn(Journey.builder()
-                        .id(2L)
-                        .build());
-
         URI uri = URI.create("/travellers/G123424/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .date(LocalDate.of(2020, 11, 17))
@@ -87,23 +59,23 @@ public class JourneyApiContractTest {
                 JourneyCreatedResponse.class
         );
 
-        assertThat(response.getBody()).isEqualTo(JourneyCreatedResponse.builder()
-                .journeyId(2L)
-                .message("Journey planned successfully")
-                .build());
+        Optional<Journey> expectedJourney = inMemorySpaceTimeJourneyRepository.fetchByTravelDetails("G123424", "Mars", LocalDate.of(2020, 11, 17));
+        assertThat(response.getBody()).isEqualTo(
+                JourneyCreatedResponse.builder()
+                        .journeyId(expectedJourney.get().getId())
+                        .message("Journey planned successfully")
+                        .build());
     }
 
     @Test
     public void returnsConflictStatusWhenJourneyAlreadyExists() {
-        when(service.scheduleJourney(
-                Journey.builder()
-                        .travellerId("G123424")
-                        .destination("Mars")
-                        .travelDate(LocalDate.of(2020, 11, 17))
-                        .build()))
-                .thenThrow(new JourneyAlreadyScheduledException(2L));
+        inMemorySpaceTimeJourneyRepository.save(Journey.builder()
+                .travellerId("B11223ss")
+                .destination("Mars")
+                .travelDate(LocalDate.of(2020, 11, 17))
+                .build());
 
-        URI uri = URI.create("/travellers/G123424/journeys");
+        URI uri = URI.create("/travellers/B11223ss/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .date(LocalDate.of(2020, 11, 17))
                 .place("Mars")
@@ -171,7 +143,7 @@ public class JourneyApiContractTest {
 
     @Test
     public void returnsBadRequestWhenDateIsMissingOnRequest() {
-        URI uri = URI.create("/travellers/a1212ss/journeys");
+        URI uri = URI.create("/travellers/a121AA/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .place("Earth")
                 .build();
@@ -187,14 +159,11 @@ public class JourneyApiContractTest {
 
     @Test
     public void successfullyFetchesAllJourneysForATraveller() {
-        URI uri = URI.create("/travellers/a234234/journeys");
-        when(service.fetchAllJourneysFor("a234234")).thenReturn(List.of(
-                Journey.builder()
-                        .id(1L)
-                        .destination("Earth")
-                        .travelDate(LocalDate.of(2020, 1, 1))
-                        .build()
-        ));
+        URI uri = URI.create("/travellers/B2AA234/journeys");
+        inMemorySpaceTimeJourneyRepository.save(Journey.builder()
+                .destination("Earth")
+                .travelDate(LocalDate.of(2020, 1, 1))
+                .build());
 
         ResponseEntity<FetchTravellersJourneysResponse> response = testRestTemplate.getForEntity(
                 uri,
@@ -206,26 +175,21 @@ public class JourneyApiContractTest {
 
     @Test
     public void returnsDetailsForAllJourneysForATraveller() {
-        URI uri = URI.create("/travellers/a1212ss/journeys");
+        URI uri = URI.create("/travellers/G44bA2ss/journeys");
         Journey earthJourney = Journey.builder()
                 .id(1L)
-                .travellerId("a1212ss")
+                .travellerId("G44bA2ss")
                 .destination("Earth")
                 .travelDate(LocalDate.of(2020, 1, 1))
                 .build();
         Journey saturnJourney = Journey.builder()
                 .id(2L)
-                .travellerId("a1212ss")
+                .travellerId("G44bA2ss")
                 .destination("Saturn")
                 .travelDate(LocalDate.of(2021, 1, 1))
                 .build();
-
-        when(service.fetchAllJourneysFor("a1212ss")).thenReturn(
-                List.of(
-                        earthJourney,
-                        saturnJourney
-                )
-        );
+        Journey savedEarthJourney = inMemorySpaceTimeJourneyRepository.save(earthJourney);
+        Journey savedSaturnJourney = inMemorySpaceTimeJourneyRepository.save(saturnJourney);
 
         ResponseEntity<FetchTravellersJourneysResponse> response = testRestTemplate.getForEntity(
                 uri,
@@ -233,22 +197,18 @@ public class JourneyApiContractTest {
         );
 
         List<Journey> journeys = response.getBody().getJourneys();
-        assertThat(journeys).containsExactlyInAnyOrder(earthJourney, saturnJourney);
+        assertThat(journeys).containsExactlyInAnyOrder(savedEarthJourney, savedSaturnJourney);
     }
 
     @Test
     public void successfullyFetchesAParticularJourneyForAGivenTraveller() {
-        URI uri = URI.create("/travellers/a1212ss/journeys/1");
         Journey earthJourney = Journey.builder()
-                .id(1L)
-                .travellerId("a1212ss")
+                .travellerId("C00SSk")
                 .destination("Earth")
                 .travelDate(LocalDate.of(2020, 1, 1))
                 .build();
-
-        when(service.fetchJourneysDetailsFor("a1212ss", 1L)).thenReturn(
-                List.of(earthJourney)
-        );
+        Journey savedEarthJourney = inMemorySpaceTimeJourneyRepository.save(earthJourney);
+        URI uri = URI.create("/travellers/C00SSk/journeys/" + savedEarthJourney.getId());
 
         ResponseEntity<FetchTravellersJourneysResponse> response = testRestTemplate.getForEntity(
                 uri,
@@ -256,17 +216,12 @@ public class JourneyApiContractTest {
         );
 
         List<Journey> journeys = response.getBody().getJourneys();
-        assertThat(journeys).containsExactlyInAnyOrder(earthJourney);
+        assertThat(journeys).containsExactlyInAnyOrder(savedEarthJourney);
     }
 
     @Test
     public void returnsNotFoundWhenSpecificJourneyCanNotBeFound() {
         URI uri = URI.create("/travellers/a1212ss/journeys/1");
-
-        when(service.fetchJourneysDetailsFor("a1212ss", 1L)).thenThrow(
-                new JourneyNotFoundException()
-        );
-
         ResponseEntity<FetchTravellersJourneysResponse> response = testRestTemplate.getForEntity(
                 uri,
                 FetchTravellersJourneysResponse.class

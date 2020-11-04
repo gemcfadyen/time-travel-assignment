@@ -23,6 +23,7 @@
         <mockito.version>3.6.0</mockito.version>
         <swagger.version>2.9.2</swagger.version>
         <swagger-springfox.version>2.9.2</swagger-springfox.version>
+        <mockito-core.version>2.21.0</mockito-core.version>
     </properties>
 
     <dependencies>
@@ -95,7 +96,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
+            <version>${mockito-core.version}</version>
             <scope>test</scope>
         </dependency>
 
