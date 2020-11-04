@@ -2,6 +2,7 @@ package com.spacetime.journeys.service;
 
 import com.spacetime.journeys.domain.Journey;
 import com.spacetime.journeys.domain.JourneyAlreadyScheduledException;
+import com.spacetime.journeys.domain.JourneyNotFoundException;
 import com.spacetime.journeys.repository.JourneyRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,11 +29,15 @@ public class SpaceTimeJourneyService implements JourneyService {
 
     @Override
     public List<Journey> fetchAllJourneysFor(String personalGalacticIdentifier) {
-        return null;
+        return repository.fetchJourneysFor(personalGalacticIdentifier);
     }
 
     @Override
     public List<Journey> fetchJourneysDetailsFor(String personalGalacticIdentifier, Long journeyId) {
-        return null;
+        List<Journey> journeys = repository.fetchJourneyFor(personalGalacticIdentifier, journeyId);
+        if (journeys.isEmpty()) {
+            throw new JourneyNotFoundException();
+        }
+        return journeys;
     }
 }

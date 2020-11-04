@@ -2,6 +2,7 @@ package com.spacetime.journeys.service;
 
 import com.spacetime.journeys.domain.Journey;
 import com.spacetime.journeys.domain.JourneyAlreadyScheduledException;
+import com.spacetime.journeys.domain.JourneyNotFoundException;
 import com.spacetime.journeys.repository.JourneyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,10 +10,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,5 +85,57 @@ public class SpaceTimeJourneyServiceTest {
                 .isThrownBy(() -> {
                     service.scheduleJourney(journeyThatIsAlreadyScheduled);
                 }).withMessage("Journey is already scheduled, id: [2]");
+    }
+
+    @Test
+    public void returnsAllJourneysScheduledForATraveller() {
+        Journey firstScheduledJourney = Journey.builder()
+                .id(2L)
+                .travellerId("G23432")
+                .travelDate(LocalDate.of(1999, 7, 23))
+                .destination("Saturn")
+                .build();
+
+        Journey secondScheduledJourney = Journey.builder()
+                .id(1L)
+                .travellerId("G23432")
+                .travelDate(LocalDate.of(1969, 2, 3))
+                .destination("Neptune")
+                .build();
+
+        when(repository.fetchJourneysFor("G23432"))
+                .thenReturn(List.of(firstScheduledJourney, secondScheduledJourney));
+
+        List<Journey> journeys = service.fetchAllJourneysFor("G23432");
+
+        assertThat(journeys).containsExactlyInAnyOrder(firstScheduledJourney, secondScheduledJourney);
+    }
+
+    @Test
+    public void returnsSpecificJourneyForATraveller() {
+        Journey scheduledJourney = Journey.builder()
+                .id(2L)
+                .travellerId("G23432")
+                .travelDate(LocalDate.of(1999, 7, 23))
+                .destination("Saturn")
+                .build();
+
+        when(repository.fetchJourneyFor("G23432", 2L))
+                .thenReturn(List.of(scheduledJourney));
+
+        List<Journey> journeys = service.fetchJourneysDetailsFor("G23432", 2L);
+
+        assertThat(journeys).containsExactlyInAnyOrder(scheduledJourney);
+    }
+
+    @Test
+    public void throwsExceptionWhenSpecificJourneyNotFound() {
+        when(repository.fetchJourneyFor("G23432", 2L))
+                .thenReturn(Collections.emptyList());
+
+        assertThatExceptionOfType(JourneyNotFoundException.class)
+                .isThrownBy(() -> {
+                    service.fetchJourneysDetailsFor("G23432", 2L);
+                });
     }
 }

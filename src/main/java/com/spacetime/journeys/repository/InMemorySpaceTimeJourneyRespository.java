@@ -1,10 +1,12 @@
 package com.spacetime.journeys.repository;
 
 import com.spacetime.journeys.domain.Journey;
+import com.spacetime.journeys.domain.JourneyNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemorySpaceTimeJourneyRespository implements JourneyRepository {
@@ -29,8 +31,19 @@ public class InMemorySpaceTimeJourneyRespository implements JourneyRepository {
     @Override
     public Optional<Journey> fetchByTravelDetails(String travellerId, String destination, LocalDate travelDate) {
         List<Journey> journeys = travellerIdAndTheirJourneys.get(travellerId);
-
         return findMatchingJourney(travellerId, destination, travelDate, journeys);
+    }
+
+    @Override
+    public List<Journey> fetchJourneysFor(String travellerId) {
+        List<Journey> journeys = travellerIdAndTheirJourneys.get(travellerId);
+        return journeys == null ? new ArrayList<>() : journeys;
+    }
+
+    @Override
+    public List<Journey> fetchJourneyFor(String travellerId, Long journeyId) {
+        List<Journey> journeys = travellerIdAndTheirJourneys.get(travellerId);
+        return findMatchingJourney(journeyId, journeys);
     }
 
     private List<Journey> updatedJourneys(List<Journey> existingJourneys, Journey journeyToSave) {
@@ -51,5 +64,21 @@ public class InMemorySpaceTimeJourneyRespository implements JourneyRepository {
                                 && journey.getDestination().equals(destination)
                                 && journey.getTravelDate().equals(travelDate))
                         .findFirst();
+    }
+
+    private List<Journey> findMatchingJourney(Long journeyId, List<Journey> journeys) {
+        if (journeys == null) {
+            throw new JourneyNotFoundException();
+        }
+
+        List<Journey> matchingJourney = journeys
+                .stream()
+                .filter(journey -> journey.getId().equals(journeyId))
+                .collect(Collectors.toList());
+
+        if (matchingJourney.isEmpty()) {
+            throw new JourneyNotFoundException();
+        }
+        return matchingJourney;
     }
 }

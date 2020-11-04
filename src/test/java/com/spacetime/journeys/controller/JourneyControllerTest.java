@@ -1,5 +1,6 @@
 package com.spacetime.journeys.controller;
 
+import com.spacetime.journeys.domain.FetchTravellersJourneysResponse;
 import com.spacetime.journeys.domain.Journey;
 import com.spacetime.journeys.domain.JourneyCreatedResponse;
 import com.spacetime.journeys.domain.JourneyRequest;
@@ -11,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
@@ -67,4 +70,44 @@ public class JourneyControllerTest {
         assertThat(response.getJourneyId()).isEqualTo(1L);
     }
 
+    @Test
+    public void getsAllJourneysForATraveller() {
+        Journey earthJourney = Journey.builder()
+                .id(1L)
+                .travellerId("a1212ss")
+                .destination("Earth")
+                .travelDate(LocalDate.of(2020, 1, 1))
+                .build();
+        when(service.fetchAllJourneysFor("G234w33"))
+                .thenReturn(List.of(earthJourney));
+
+        FetchTravellersJourneysResponse response = controller.fetchJourneysFor("G234w33");
+
+        assertThat(response.getJourneys()).isEqualTo(List.of(earthJourney));
+    }
+
+    @Test
+    public void returnsEmptyListIfTravellerHasNotScheduledAnyJourneys() {
+        when(service.fetchAllJourneysFor("G234w33")).thenReturn(Collections.emptyList());
+
+        FetchTravellersJourneysResponse response = controller.fetchJourneysFor("G234w33", 1L);
+
+        assertThat(response.getJourneys()).isEqualTo(Collections.emptyList());
+    }
+
+    @Test
+    public void getsSpecificJourneyForTraveller() {
+        Journey earthJourney = Journey.builder()
+                .id(1L)
+                .travellerId("G234w33")
+                .destination("Earth")
+                .travelDate(LocalDate.of(2020, 1, 1))
+                .build();
+        when(service.fetchJourneysDetailsFor("G234w33", 1L))
+                .thenReturn(List.of(earthJourney));
+
+        FetchTravellersJourneysResponse response = controller.fetchJourneysFor("G234w33", 1L);
+
+        assertThat(response.getJourneys()).isEqualTo(List.of(earthJourney));
+    }
 }

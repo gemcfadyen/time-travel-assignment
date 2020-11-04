@@ -1,15 +1,18 @@
 package com.spacetime.journeys.repository;
 
 import com.spacetime.journeys.domain.Journey;
+import com.spacetime.journeys.domain.JourneyNotFoundException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class InMemorySpaceTimeJourneyRepositoryTest {
-    private JourneyRepository inMemoryRepository = new InMemorySpaceTimeJourneyRespository();
+    private final JourneyRepository inMemoryRepository = new InMemorySpaceTimeJourneyRespository();
 
     @Test
     public void savesTravellersFirstJourney() {
@@ -76,5 +79,94 @@ public class InMemorySpaceTimeJourneyRepositoryTest {
                 LocalDate.of(1999, 7, 7));
 
         assertThat(possibleSavedJourney).isEmpty();
+    }
+
+    @Test
+    public void fetchesAllJourneysForATraveller() {
+        Journey firstJourney = Journey.builder()
+                .destination("Venus")
+                .travelDate(LocalDate.of(1999, 7, 7))
+                .travellerId("G234234")
+                .build();
+
+        Journey secondJourney = Journey.builder()
+                .destination("Saturn")
+                .travelDate(LocalDate.of(1833, 2, 11))
+                .travellerId("G234234")
+                .build();
+
+        Journey journeyForUnrelatedTraveller = Journey.builder()
+                .destination("Earth")
+                .travelDate(LocalDate.of(1233, 11, 1))
+                .travellerId("AB22324")
+                .build();
+
+        Journey firstSavedJourney = inMemoryRepository.save(firstJourney);
+        Journey secondSavedJourney = inMemoryRepository.save(secondJourney);
+        inMemoryRepository.save(journeyForUnrelatedTraveller);
+
+        List<Journey> journeys = inMemoryRepository.fetchJourneysFor("G234234");
+
+        assertThat(journeys).containsExactlyInAnyOrder(firstSavedJourney, secondSavedJourney);
+    }
+
+    @Test
+    public void returnsEmptyListWhenTravellerHasNoScheduledJourneys() {
+        Journey journeyForUnrelatedTraveller = Journey.builder()
+                .destination("Earth")
+                .travelDate(LocalDate.of(1233, 11, 1))
+                .travellerId("AB22324")
+                .build();
+
+        inMemoryRepository.save(journeyForUnrelatedTraveller);
+
+        List<Journey> journeys = inMemoryRepository.fetchJourneysFor("G234234");
+
+        assertThat(journeys).isEmpty();
+    }
+
+    @Test
+    public void returnsParticularJourneyForATraveller() {
+        Journey firstJourney = Journey.builder()
+                .destination("Saturn")
+                .travelDate(LocalDate.of(1833, 2, 11))
+                .travellerId("AB22324")
+                .build();
+
+        Journey secondJourney = Journey.builder()
+                .destination("Earth")
+                .travelDate(LocalDate.of(1233, 11, 1))
+                .travellerId("AB22324")
+                .build();
+
+        Journey savedJourney = inMemoryRepository.save(firstJourney);
+        inMemoryRepository.save(secondJourney);
+
+        List<Journey> journeys = inMemoryRepository.fetchJourneyFor("AB22324", savedJourney.getId());
+
+        assertThat(journeys).containsExactlyInAnyOrder(savedJourney);
+    }
+
+    @Test
+    public void throwsExceptionWhenFetchingSpecificJourneyWhenTravellerHasNone() {
+        assertThatExceptionOfType(JourneyNotFoundException.class)
+                .isThrownBy(() -> {
+                    inMemoryRepository.fetchJourneyFor("AB22324", -1L);
+                });
+    }
+
+    @Test
+    public void throwsExceptionWhenSpecificJourneyNotFoundForTraveller() {
+        Journey firstJourney = Journey.builder()
+                .destination("Saturn")
+                .travelDate(LocalDate.of(1833, 2, 11))
+                .travellerId("AB22324")
+                .build();
+        inMemoryRepository.save(firstJourney);
+
+        assertThatExceptionOfType(JourneyNotFoundException.class)
+                .isThrownBy(() -> {
+                    inMemoryRepository.fetchJourneyFor("AB22324", -1L);
+                });
     }
 }

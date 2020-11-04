@@ -233,8 +233,7 @@ public class JourneyApiContractTest {
         );
 
         List<Journey> journeys = response.getBody().getJourneys();
-        assertThat(journeys.size()).isEqualTo(2);
-        assertThat(journeys).contains(earthJourney, saturnJourney);
+        assertThat(journeys).containsExactlyInAnyOrder(earthJourney, saturnJourney);
     }
 
     @Test
@@ -257,8 +256,7 @@ public class JourneyApiContractTest {
         );
 
         List<Journey> journeys = response.getBody().getJourneys();
-        assertThat(journeys.size()).isEqualTo(1);
-        assertThat(journeys).contains(earthJourney);
+        assertThat(journeys).containsExactlyInAnyOrder(earthJourney);
     }
 
     @Test
