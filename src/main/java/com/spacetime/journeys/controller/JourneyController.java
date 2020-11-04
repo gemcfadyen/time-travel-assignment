@@ -19,11 +19,7 @@ public class JourneyController {
     @PostMapping(produces = {"application/json"}, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public JourneyCreatedResponse createJourney(@RequestBody JourneyRequest request) {
-        Journey scheduledJourney = service.scheduleJourney(
-                Journey.builder()
-                        .travellerId(request.getPersonalGalacticIdentifier())
-                        .destination(request.getPlace())
-                        .travelDate(request.getDate()).build());
+        Journey scheduledJourney = service.scheduleJourney(request.toJourney());
 
         return JourneyCreatedResponse.builder()
                 .journeyId(scheduledJourney.getId())
