@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class JourneyCreatedResponse {
-    private String journeyId;
+    private Long journeyId;
     private String message;
 }

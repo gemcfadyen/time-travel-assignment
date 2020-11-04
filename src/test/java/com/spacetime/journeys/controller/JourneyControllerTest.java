@@ -1,5 +1,6 @@
 package com.spacetime.journeys.controller;
 
+import com.spacetime.journeys.domain.Journey;
 import com.spacetime.journeys.domain.JourneyCreatedResponse;
 import com.spacetime.journeys.domain.JourneyRequest;
 import com.spacetime.journeys.service.JourneyService;
@@ -30,27 +31,41 @@ public class JourneyControllerTest {
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .date(LocalDate.of(2045, 4, 11))
                 .place("Moon")
-                .personalGalacticIdentifier("G23d")
+                .personalGalacticIdentifier("G23d234")
                 .build();
+
+        when(service.scheduleJourney(any())).thenReturn(Journey.builder()
+                .id(1L)
+                .build());
 
         controller.createJourney(journeyRequest);
 
-        verify(service).scheduleJourney("G23d", "Moon", LocalDate.of(2045, 4, 11));
+        verify(service).scheduleJourney(Journey.builder()
+                .travellerId("G23d234")
+                .destination("Moon")
+                .travelDate(LocalDate.of(2045, 4, 11))
+                .build());
     }
 
     @Test
     public void returnsNewlyCreatedJourneyId() {
-        when(service.scheduleJourney("G23d", "Moon", LocalDate.of(2045, 4, 11)))
-                .thenReturn("J1");
+        when(service.scheduleJourney(Journey.builder()
+                .travellerId("G23d234")
+                .destination("Moon")
+                .travelDate(LocalDate.of(2045, 4, 11))
+                .build()))
+                .thenReturn(Journey.builder()
+                        .id(1L)
+                        .build());
 
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .date(LocalDate.of(2045, 4, 11))
                 .place("Moon")
-                .personalGalacticIdentifier("G23d")
+                .personalGalacticIdentifier("G23d234")
                 .build();
 
         JourneyCreatedResponse response = controller.createJourney(journeyRequest);
 
-        assertThat(response.getJourneyId()).isEqualTo("J1");
+        assertThat(response.getJourneyId()).isEqualTo(1L);
     }
 }

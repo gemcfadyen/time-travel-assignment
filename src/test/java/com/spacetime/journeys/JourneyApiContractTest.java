@@ -1,5 +1,7 @@
 package com.spacetime.journeys;
 
+import com.spacetime.journeys.domain.Journey;
+import com.spacetime.journeys.domain.JourneyAlreadyScheduledException;
 import com.spacetime.journeys.domain.JourneyCreatedResponse;
 import com.spacetime.journeys.domain.JourneyRequest;
 import com.spacetime.journeys.service.JourneyService;
@@ -38,6 +40,16 @@ public class JourneyApiContractTest {
 
     @Test
     public void successfullyCreatesAJourney() {
+        when(service.scheduleJourney(
+                Journey.builder()
+                        .travellerId("G1234b561")
+                        .destination("Mars")
+                        .travelDate(LocalDate.of(2020, 11, 17))
+                        .build()))
+                .thenReturn(Journey.builder()
+                        .id(2L)
+                        .build());
+
         URI uri = URI.create("/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .personalGalacticIdentifier("G1234b561")
@@ -56,8 +68,16 @@ public class JourneyApiContractTest {
 
     @Test
     public void successfulMessageReturnedInResponseBody() {
-        when(service.scheduleJourney("G123424", "Mars", LocalDate.of(2020, 11, 17)))
-                .thenReturn("J1");
+        when(service.scheduleJourney(
+                Journey.builder()
+                        .travellerId("G123424")
+                        .destination("Mars")
+                        .travelDate(LocalDate.of(2020, 11, 17))
+                        .build()))
+                .thenReturn(Journey.builder()
+                        .id(2L)
+                        .build());
+
         URI uri = URI.create("/journeys");
         JourneyRequest journeyRequest = JourneyRequest.builder()
                 .personalGalacticIdentifier("G123424")
@@ -72,8 +92,34 @@ public class JourneyApiContractTest {
         );
 
         assertThat(response.getBody()).isEqualTo(JourneyCreatedResponse.builder()
-                .journeyId("J1")
+                .journeyId(2L)
                 .message("Journey planned successfully")
                 .build());
+    }
+
+    @Test
+    public void returnsConflictStatusWhenJourneyAlreadyExists() {
+        when(service.scheduleJourney(
+                Journey.builder()
+                        .travellerId("G123424")
+                        .destination("Mars")
+                        .travelDate(LocalDate.of(2020, 11, 17))
+                        .build()))
+                .thenThrow(new JourneyAlreadyScheduledException(2L));
+
+        URI uri = URI.create("/journeys");
+        JourneyRequest journeyRequest = JourneyRequest.builder()
+                .personalGalacticIdentifier("G123424")
+                .date(LocalDate.of(2020, 11, 17))
+                .place("Mars")
+                .build();
+
+        ResponseEntity<JourneyCreatedResponse> response = testRestTemplate.postForEntity(
+                uri,
+                journeyRequest,
+                JourneyCreatedResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 }

@@ -1,7 +1,7 @@
 package com.spacetime.journeys.service;
 
-import java.time.LocalDate;
+import com.spacetime.journeys.domain.Journey;
 
 public interface JourneyService {
-    String scheduleJourney(String id, String place, LocalDate date);
+    Journey scheduleJourney(Journey journey);
 }

@@ -1,5 +1,6 @@
 package com.spacetime.journeys.controller;
 
+import com.spacetime.journeys.domain.Journey;
 import com.spacetime.journeys.domain.JourneyCreatedResponse;
 import com.spacetime.journeys.domain.JourneyRequest;
 import com.spacetime.journeys.service.JourneyService;
@@ -18,12 +19,14 @@ public class JourneyController {
     @PostMapping(produces = {"application/json"}, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public JourneyCreatedResponse createJourney(@RequestBody JourneyRequest request) {
-        String journeyId = service.scheduleJourney(request.getPersonalGalacticIdentifier(),
-                request.getPlace(),
-                request.getDate());
+        Journey scheduledJourney = service.scheduleJourney(
+                Journey.builder()
+                        .travellerId(request.getPersonalGalacticIdentifier())
+                        .destination(request.getPlace())
+                        .travelDate(request.getDate()).build());
 
         return JourneyCreatedResponse.builder()
-                .journeyId(journeyId)
+                .journeyId(scheduledJourney.getId())
                 .message("Journey planned successfully")
                 .build();
     }
