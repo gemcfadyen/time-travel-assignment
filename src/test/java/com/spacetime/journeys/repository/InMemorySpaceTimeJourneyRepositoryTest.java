@@ -1,7 +1,8 @@
 package com.spacetime.journeys.repository;
 
 import com.spacetime.journeys.domain.Journey;
-import com.spacetime.journeys.domain.JourneyNotFoundException;
+import com.spacetime.journeys.domain.exceptions.JourneyNotFoundException;
+import com.spacetime.journeys.repository.inmemory.InMemorySpaceTimeJourneyRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

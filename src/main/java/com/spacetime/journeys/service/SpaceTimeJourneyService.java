@@ -1,8 +1,8 @@
 package com.spacetime.journeys.service;
 
 import com.spacetime.journeys.domain.Journey;
-import com.spacetime.journeys.domain.JourneyAlreadyScheduledException;
-import com.spacetime.journeys.domain.JourneyNotFoundException;
+import com.spacetime.journeys.domain.exceptions.JourneyAlreadyScheduledException;
+import com.spacetime.journeys.domain.exceptions.JourneyNotFoundException;
 import com.spacetime.journeys.repository.JourneyRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Service
 public class SpaceTimeJourneyService implements JourneyService {
-    private JourneyRepository repository;
+    private final JourneyRepository repository;
 
     SpaceTimeJourneyService(JourneyRepository repository) {
         this.repository = repository;

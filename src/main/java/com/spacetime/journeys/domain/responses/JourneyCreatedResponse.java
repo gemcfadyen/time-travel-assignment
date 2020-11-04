@@ -1,4 +1,4 @@
-package com.spacetime.journeys.domain;
+package com.spacetime.journeys.domain.responses;
 
 import lombok.*;
 

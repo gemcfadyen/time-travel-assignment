@@ -1,6 +1,9 @@
 package com.spacetime.journeys;
 
 import com.spacetime.journeys.domain.*;
+import com.spacetime.journeys.domain.requests.JourneyRequest;
+import com.spacetime.journeys.domain.responses.FetchTravellersJourneysResponse;
+import com.spacetime.journeys.domain.responses.JourneyCreatedResponse;
 import com.spacetime.journeys.repository.JourneyRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

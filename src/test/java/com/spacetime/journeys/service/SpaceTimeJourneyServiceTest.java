@@ -1,8 +1,8 @@
 package com.spacetime.journeys.service;
 
 import com.spacetime.journeys.domain.Journey;
-import com.spacetime.journeys.domain.JourneyAlreadyScheduledException;
-import com.spacetime.journeys.domain.JourneyNotFoundException;
+import com.spacetime.journeys.domain.exceptions.JourneyAlreadyScheduledException;
+import com.spacetime.journeys.domain.exceptions.JourneyNotFoundException;
 import com.spacetime.journeys.repository.JourneyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

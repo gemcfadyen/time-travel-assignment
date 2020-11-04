@@ -1,5 +1,7 @@
 package com.spacetime.journeys.controller;
 
+import com.spacetime.journeys.controller.validation.PersonalGalacticIdentifierValidator;
+
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.Documented;

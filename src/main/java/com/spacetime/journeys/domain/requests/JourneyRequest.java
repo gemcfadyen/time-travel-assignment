@@ -1,5 +1,6 @@
-package com.spacetime.journeys.domain;
+package com.spacetime.journeys.domain.requests;
 
+import com.spacetime.journeys.domain.Journey;
 import lombok.Builder;
 import lombok.Data;
 

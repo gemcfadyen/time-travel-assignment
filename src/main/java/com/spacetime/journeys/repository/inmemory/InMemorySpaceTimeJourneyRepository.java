@@ -1,7 +1,8 @@
-package com.spacetime.journeys.repository;
+package com.spacetime.journeys.repository.inmemory;
 
 import com.spacetime.journeys.domain.Journey;
-import com.spacetime.journeys.domain.JourneyNotFoundException;
+import com.spacetime.journeys.domain.exceptions.JourneyNotFoundException;
+import com.spacetime.journeys.repository.JourneyRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;

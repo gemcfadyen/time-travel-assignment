@@ -1,5 +1,6 @@
 package com.spacetime.journeys.controller;
 
+import com.spacetime.journeys.controller.validation.PersonalGalacticIdentifierValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

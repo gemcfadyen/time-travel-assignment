@@ -1,9 +1,9 @@
 package com.spacetime.journeys.controller;
 
-import com.spacetime.journeys.domain.FetchTravellersJourneysResponse;
+import com.spacetime.journeys.domain.responses.FetchTravellersJourneysResponse;
 import com.spacetime.journeys.domain.Journey;
-import com.spacetime.journeys.domain.JourneyCreatedResponse;
-import com.spacetime.journeys.domain.JourneyRequest;
+import com.spacetime.journeys.domain.responses.JourneyCreatedResponse;
+import com.spacetime.journeys.domain.requests.JourneyRequest;
 import com.spacetime.journeys.service.JourneyService;
 
 import org.junit.jupiter.api.BeforeEach;
