@@ -6,7 +6,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.2.11.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
     <groupId>com.spacetime</groupId>
     <artifactId>journeys</artifactId>
@@ -16,6 +16,7 @@
 
     <properties>
         <java.version>15</java.version>
+        <lombok.version>1.18.16</lombok.version>
         <junit.platform.version>5.7.0</junit.platform.version>
         <junit.runner.version>1.7.0</junit.runner.version>
         <assertj.version>3.18.0</assertj.version>
@@ -25,6 +26,28 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -70,5 +93,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
