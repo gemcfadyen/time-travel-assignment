@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class InMemorySpaceTimeJourneyRepositoryTest {
-    private final JourneyRepository inMemoryRepository = new InMemorySpaceTimeJourneyRespository();
+    private final JourneyRepository inMemoryRepository = new InMemorySpaceTimeJourneyRepository();
 
     @Test
     public void savesTravellersFirstJourney() {

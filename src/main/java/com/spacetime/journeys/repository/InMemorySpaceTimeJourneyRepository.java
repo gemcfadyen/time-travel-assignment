@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class InMemorySpaceTimeJourneyRespository implements JourneyRepository {
+public class InMemorySpaceTimeJourneyRepository implements JourneyRepository {
     private final Map<String, List<Journey>> travellerIdAndTheirJourneys = new HashMap<>();
 
     @Override
