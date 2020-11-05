@@ -29,6 +29,11 @@ Clone the code:
 git clone git@github.com:gemcfadyen/time-travel-assignment.git
 ```
 
+Navigate to the root directory:
+```
+cd time-travel-assignment
+```
+
 Build the code and run the tests:
 
 For macOS/Linux:
