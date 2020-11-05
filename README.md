@@ -65,5 +65,4 @@ An in memory repository is provided.
 
 ## API Documentation
 
-When running locally, the swagger documentation can be browsed at `http://localhost:8081/swagger-ui.html`.
-
+When running locally, the swagger documentation can be browsed at `http://localhost:8081/swagger-ui.html` which details the available POST and GET endpoints.

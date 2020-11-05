@@ -6,6 +6,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+
 @Data
 @Builder
 public class JourneyRequest {
@@ -15,10 +16,10 @@ public class JourneyRequest {
     private String place;
 
     public Journey toJourney(String personalGalacticIdentifier) {
-       return Journey.builder()
-               .travellerId(personalGalacticIdentifier)
-               .destination(this.place)
-               .travelDate(this.date)
-               .build() ;
+        return Journey.builder()
+                .travellerId(personalGalacticIdentifier)
+                .destination(this.place)
+                .travelDate(this.date)
+                .build();
     }
 }
